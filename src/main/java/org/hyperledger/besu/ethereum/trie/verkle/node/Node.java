@@ -41,6 +41,9 @@ public abstract class Node<V> {
           "0x0000000000000000000000000000000000000000000000000000000000000000"
               + "0100000000000000000000000000000000000000000000000000000000000000");
 
+  /** A constant representing a compressed commitment to NullNodes */
+  public static Bytes32 EMPTY_COMMITMENT_COMPRESSED = Bytes32.ZERO;
+
   Optional<?> previous;
   boolean dirty;
   boolean persisted;
@@ -237,12 +240,14 @@ public abstract class Node<V> {
    * @return The low value.
    */
   public static Bytes32 getLowValue(Optional<?> value) {
-    // Low values have a flag at bit 128.
     return value
         .map(
-            (v) ->
-                Bytes32.rightPad(
-                    Bytes.concatenate(Bytes32.rightPad((Bytes) v).slice(0, 16), Bytes.of(1))))
+            (v) -> {
+              byte[] array = new byte[32];
+              array[16] = 1; // Low values have a isNotNull flag at bit 128
+              System.arraycopy(((Bytes32) v).toArrayUnsafe(), 0, array, 0, 16);
+              return Bytes32.wrap(array);
+            })
         .orElse(Bytes32.ZERO);
   }
 
@@ -254,7 +259,16 @@ public abstract class Node<V> {
    */
   public static Bytes32 getHighValue(Optional<?> value) {
     return value
-        .map((v) -> Bytes32.rightPad(Bytes32.rightPad((Bytes) v).slice(16, 16)))
+        .map(Bytes.class::cast)
+        .map(
+            (v) -> {
+              final byte[] array = new byte[32];
+              final int size = v.size();
+              if (size > 16) {
+                System.arraycopy(((Bytes32) v).toArrayUnsafe(), 16, array, 0, size - 16);
+              }
+              return Bytes32.wrap(array);
+            })
         .orElse(Bytes32.ZERO);
   }
 
