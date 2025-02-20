@@ -35,6 +35,9 @@ import org.apache.tuweni.bytes.Bytes32;
  */
 public class StemNode<V> extends BranchNode<V> {
 
+  /** A constant representing a StemNode's extension Marker */
+  public static Bytes32 MARKER = Bytes32.fromHexString("0x01");
+
   private final Bytes stem;
   private Optional<Bytes32> leftHash;
   private Optional<Bytes> leftCommitment;
@@ -212,7 +215,6 @@ public class StemNode<V> extends BranchNode<V> {
    * @return The updated Node
    */
   @Override
-  @SuppressWarnings("unchecked")
   public StemNode<V> replaceLocation(Bytes newLocation) {
     List<Node<V>> newChildren = new ArrayList<>(maxChild());
     for (int i = 0; i < maxChild(); i++) {
