@@ -1,8 +1,7 @@
-# besu-verkle-trie
+# besu-stateless
 
 
-`besu-verkle-trie` is a Java library that implements the Java part of Verkle Trie for Ethereum.
-
+`besu-stateless` is a Java library that provides the necessary components for implementing stateless compatibility in Besu
 
 ## Table of Contents
 
@@ -19,10 +18,10 @@
 ## Installation
 
 
-`besu-verkle-trie` is available on [Hyperledger Artifactory](https://hyperledger.jfrog.io/ui/packages?name=besu-verkle-trie&type=packages).
+`besu-stateless` is available on [Hyperledger Artifactory](https://hyperledger.jfrog.io/ui/packages?name=besu-stateless&type=packages).
 
 
-To install `besu-verkle-trie`, you can use the build automation tool [Gradle](https://gradle.org/).
+To install `besu-stateless`, you can use the build automation tool [Gradle](https://gradle.org/).
 
 
 ## Building
@@ -49,4 +48,4 @@ Contributions are welcome! Please see - [CONTRIBUTING.md](CONTRIBUTING.md) for d
 
 
 
-`besu-verkle-trie` is licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+`besu-stateless` is licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.

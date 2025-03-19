@@ -103,7 +103,7 @@ allprojects {
   }
 
   jar {
-    archiveBaseName = 'besu-verkle.trie'
+    archiveBaseName = 'besu-stateless'
     includeEmptyDirs = false
     manifest {
       attributes(
@@ -111,19 +111,19 @@ allprojects {
         'Specification-Version': project.version,
         'Implementation-Title': archiveBaseName,
         'Implementation-Version': project.version,
-        'Automatic-Module-Name': 'org.hyperledger.besu.verkle.trie'
+        'Automatic-Module-Name': 'org.hyperledger.besu.stateless'
         )
     }
   }
 
   task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveBaseName = 'besu-verkle.trie'
+    archiveBaseName = 'besu-stateless'
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
   }
 
   task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveBaseName = 'besu-verkle.trie'
+    archiveBaseName = 'besu-stateless'
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
   }
@@ -133,7 +133,7 @@ allprojects {
       mavenJava(MavenPublication) {
 
         groupId = 'org.hyperledger.besu'  // Updated groupId
-        artifactId = 'besu-verkle-trie'   // Updated artifactId
+        artifactId = 'besu-stateless'   // Updated artifactId
         version "${project.version}"
 
         from components.java
@@ -150,9 +150,9 @@ allprojects {
         }
 
         pom {
-          name = "Verkle Tries - ${project.name}"
-          description = 'VerkleTries'
-          url = 'https://github.com/hyperledger/besu-verkle-trie'
+          name = "Besu stateless - ${project.name}"
+          description = 'Besu-Stateless'
+          url = 'https://github.com/hyperledger/besu-stateless'
           licenses {
             license {
               name = 'The Apache License, Version 2.0'
@@ -160,9 +160,9 @@ allprojects {
             }
           }
           scm {
-            connection = 'scm:git:git://github.com/hyperledger/besu-verkle-trie.git'
-            developerConnection = 'scm:git:ssh://github.com/hyperledger/besu-verkle-trie.git'
-            url = 'https://github.com/hyperledger/besu-verkle-trie'
+            connection = 'scm:git:git://github.com/hyperledger/besu-stateless.git'
+            developerConnection = 'scm:git:ssh://github.com/hyperledger/besu-stateless.git'
+            url = 'https://github.com/hyperledger/besu-stateless'
           }
         }
       }
