@@ -3,7 +3,7 @@
 #
 
 repository:
-  name: besu-verkle-trie
+  name: besu-stateless
   description: An enterprise-grade Java-based, Apache 2.0 licensed Ethereum client https://wiki.hyperledger.org/display/besu
   homepage: https://www.hyperledger.org/projects/besu
   default_branch: main

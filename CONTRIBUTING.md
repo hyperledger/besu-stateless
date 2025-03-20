@@ -1,13 +1,13 @@
-# Contributing to Hyperledger Besu verkle trie
+# Contributing to Hyperledger Besu stateless
 ## :tada: Thanks for taking the time to contribute! :tada:
 
-Welcome to the Besu verkle trie repository! The following links are a set of guidelines for contributing to this repo and its packages. These are mostly guidelines, not rules. Use your best judgement, and feel free to propose changes to this document in a pull request. Contributions come in the form of code submissions, writing documentation, raising issues, helping others in chat, and any other actions that help develop Besu verkle trie.
+Welcome to the Besu stateless repository! The following links are a set of guidelines for contributing to this repo and its packages. These are mostly guidelines, not rules. Use your best judgement, and feel free to propose changes to this document in a pull request. Contributions come in the form of code submissions, writing documentation, raising issues, helping others in chat, and any other actions that help develop Besu stateless.
 
 ### Github/Discord/LF Accounts
 
-Having the following accounts is necessary for contributing code/issues to Besu verkle trie.  
+Having the following accounts is necessary for contributing code/issues to Besu stateless.  
 * If you want to contribute code, you can make a [github account here](https://github.com).  
-* If you want to raise an issue, do so [in the issues tab](https://github.com/hyperledger/besu-verkle-trie/issues).
+* If you want to raise an issue, do so [in the issues tab](https://github.com/hyperledger/besu-stateless/issues).
 * To ask questions or chat with us, join our [Discord](https://discord.gg/hyperledger)
 * To edit pages in our wiki, you'll need a [Linux Foundation (LF) account].
 
