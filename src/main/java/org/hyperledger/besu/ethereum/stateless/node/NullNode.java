@@ -152,6 +152,10 @@ public class NullNode<V> extends Node<V> {
     return nullNode;
   }
 
+  public static <T> NullNode<T> nullNode(Optional<T> previousValue) {
+    return new NullNode<>(previousValue);
+  }
+
   @SuppressWarnings("unchecked")
   public static <T> NullNode<T> newNullLeafNode() {
     if (nullLeafNode == null) {
