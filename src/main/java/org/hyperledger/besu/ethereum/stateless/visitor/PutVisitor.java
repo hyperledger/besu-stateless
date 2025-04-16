@@ -98,7 +98,7 @@ public class PutVisitor<V> implements PathNodeVisitor<V> {
       final byte index = fullPath.get(newStem.size());
       visited = Bytes.concatenate(visited, Bytes.of(index));
       final Node<V> child = stemNode.child(index);
-      final Node<V> updatedChild = stemNode.child(index).accept(this, path.slice(1));
+      final Node<V> updatedChild = child.accept(this, path.slice(1));
       if (child instanceof NullNode<V>) {
         // This call may lead to the removal of the node from the batch if a null node
         // is inserted.

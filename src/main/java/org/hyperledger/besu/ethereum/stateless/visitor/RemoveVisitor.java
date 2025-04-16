@@ -100,7 +100,7 @@ public class RemoveVisitor<V> implements PathNodeVisitor<V> {
     final Node<V> updatedChild = child.accept(this, path);
     stemNode.replaceChild(childIndex, updatedChild);
     if (allLeavesAreNull(stemNode)) {
-      final NullNode<V> nullNode = NullNode.nullNode();
+      final NullNode<V> nullNode = NullNode.nullNode(stemNode.getPrevious());
       nullNode.markDirty();
       batchProcessor.ifPresent(
           processor -> processor.addNodeToBatch(stemNode.getLocation(), nullNode));

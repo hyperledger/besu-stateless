@@ -329,4 +329,82 @@ public class StoredBatchedVerkleTrieTest {
 
     assertThat(trie3.getRootHash()).isEqualTo(expectedRootHash);
   }
+
+  @Test
+  void addRemoveMultipleKeysInBranchOverThreeBlocks() {
+    final NodeUpdaterMock nodeUpdater = new NodeUpdaterMock();
+    final NodeLoaderMock nodeLoader = new NodeLoaderMock(nodeUpdater.storage);
+
+    final Bytes32 key_0xedb2_BASIC =
+        Bytes32.fromHexString("0xedb24b771623f488b0a739020fa9601fc2769b8f62e6de227fcafa23a3651300");
+    final Bytes32 value_0xedb2_BASIC =
+        Bytes32.fromHexString("0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff");
+
+    final Bytes32 key_0xedb2_CODEHASH =
+        Bytes32.fromHexString("0xedb24b771623f488b0a739020fa9601fc2769b8f62e6de227fcafa23a3651301");
+    final Bytes32 value_0xedb2_CODEHASH =
+        Bytes32.fromHexString("0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+
+    final Bytes32 key_0xed1a_BASIC =
+        Bytes32.fromHexString("0xed1a40ec02fddf80cefb80cc58452ce8d585d1a589c6ac88021887e76ef5c500");
+    final Bytes32 value_OLD_0xed1a_BASIC =
+        Bytes32.fromHexString("0x000000000000000000000000000000000000000f000000000000000000000000");
+    final Bytes32 value_NEW_0xed1a_BASIC =
+        Bytes32.fromHexString("0x000000000000000000000000000000010000000effffffffffffffffffb36a87");
+
+    final Bytes32 key_0xed1a_CODEHASH =
+        Bytes32.fromHexString("0xed1a40ec02fddf80cefb80cc58452ce8d585d1a589c6ac88021887e76ef5c501");
+    final Bytes32 value_0xed1a_CODEHASH =
+        Bytes32.fromHexString("0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+
+    final Bytes32 key_0xedd9_BASIC =
+        Bytes32.fromHexString("0xedd901af49dc1bb5f62c3ab906060dc972e44b6a251333f85690cd1495eda700");
+    final Bytes32 value_0xedd9_BASIC =
+        Bytes32.fromHexString("0x0000000000000000000000000000000000000000000000000000000000000001");
+
+    final Bytes32 key_0xedd9_CODEHASH =
+        Bytes32.fromHexString("0xedd901af49dc1bb5f62c3ab906060dc972e44b6a251333f85690cd1495eda701");
+    final Bytes32 value_0xedd9_CODEHASH =
+        Bytes32.fromHexString("0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+
+    // add block 0
+    StoredNodeFactory<Bytes32> nodeFactory =
+        new StoredNodeFactory<>(nodeLoader, value -> (Bytes32) value);
+    StoredBatchedVerkleTrie<Bytes32, Bytes32> trie =
+        new StoredBatchedVerkleTrie<>(new VerkleTrieBatchHasher(), nodeFactory);
+
+    trie.put(key_0xedb2_BASIC, value_0xedb2_BASIC);
+    trie.put(key_0xedb2_CODEHASH, value_0xedb2_CODEHASH);
+    trie.put(key_0xed1a_BASIC, value_OLD_0xed1a_BASIC);
+    trie.put(key_0xed1a_CODEHASH, value_0xed1a_CODEHASH);
+    trie.commit(nodeUpdater);
+
+    Bytes32 block0RootHash =
+        Bytes32.fromHexString("0x40786ff866d586a069d72de805185594c988743336350fdcbcd82b8ca07327ff");
+    assertThat(trie.getRootHash()).isEqualTo(block0RootHash);
+
+    // block 1
+    nodeFactory = new StoredNodeFactory<>(nodeLoader, value -> (Bytes32) value);
+    trie = new StoredBatchedVerkleTrie<>(new VerkleTrieBatchHasher(), nodeFactory);
+
+    trie.put(key_0xed1a_BASIC, value_NEW_0xed1a_BASIC);
+    trie.put(key_0xedd9_BASIC, value_0xedd9_BASIC);
+    trie.put(key_0xedd9_CODEHASH, value_0xedd9_CODEHASH);
+    trie.commit(nodeUpdater);
+
+    Bytes32 block2RootHash =
+        Bytes32.fromHexString("0x121a999ce1f99adc775bc3b862e63ebc91144ed3e37f0ec0bc1b6b8d467cf5b1");
+    assertThat(trie.getRootHash()).isEqualTo(block2RootHash);
+
+    // rollback 1 -> 0
+    nodeFactory = new StoredNodeFactory<>(nodeLoader, value -> (Bytes32) value);
+    trie = new StoredBatchedVerkleTrie<>(new VerkleTrieBatchHasher(), nodeFactory);
+
+    trie.put(key_0xed1a_BASIC, value_OLD_0xed1a_BASIC);
+    trie.remove(key_0xedd9_BASIC);
+    trie.remove(key_0xedd9_CODEHASH);
+    trie.commit(nodeUpdater);
+
+    assertThat(trie.getRootHash()).isEqualTo(block0RootHash);
+  }
 }

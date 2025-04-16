@@ -202,9 +202,10 @@ public abstract class BranchNode<V> extends Node<V> {
    *
    * @return previous hash of this node
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public Optional<Bytes32> getPrevious() {
-    return previous.map(Bytes32.class::cast);
+  public Optional<V> getPrevious() {
+    return previous.map(o -> (V) o);
   }
 
   /**
