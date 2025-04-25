@@ -37,6 +37,10 @@ public class NodeUpdaterMock implements NodeUpdater {
 
   @Override
   public void store(Bytes location, Bytes32 hash, Bytes value) {
-    storage.put(location, value);
+    if (value == null) {
+      storage.remove(location);
+    } else {
+      storage.put(location, value);
+    }
   }
 }

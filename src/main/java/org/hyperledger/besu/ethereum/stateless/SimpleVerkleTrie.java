@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.hyperledger.besu.ethereum.stateless.exporter.DotExporter;
 import org.hyperledger.besu.ethereum.stateless.node.InternalNode;
 import org.hyperledger.besu.ethereum.stateless.node.Node;
+import org.hyperledger.besu.ethereum.stateless.pruning.StemPrunableNodeRegistry;
 import org.hyperledger.besu.ethereum.stateless.visitor.CommitVisitor;
 import org.hyperledger.besu.ethereum.stateless.visitor.GetVisitor;
 import org.hyperledger.besu.ethereum.stateless.visitor.HashVisitor;
@@ -42,11 +43,13 @@ import org.apache.tuweni.bytes.Bytes32;
  * @param <V> The type of values in the Verkle Trie.
  */
 public class SimpleVerkleTrie<K extends Bytes, V extends Bytes> implements VerkleTrie<K, V> {
+
+  protected StemPrunableNodeRegistry stemPrunableNodeRegistry;
   protected Node<V> root;
 
   /** Creates a new Verkle Trie with a null node as the root. */
   public SimpleVerkleTrie() {
-    this.root = new InternalNode<V>(Bytes.EMPTY);
+    this(new InternalNode<V>(Bytes.EMPTY));
   }
 
   /**
@@ -54,17 +57,18 @@ public class SimpleVerkleTrie<K extends Bytes, V extends Bytes> implements Verkl
    *
    * @param root The root node of the Verkle Trie.
    */
-  public SimpleVerkleTrie(Node<V> root) {
+  public SimpleVerkleTrie(final Optional<Node<V>> root) {
+    this(root.orElse(new InternalNode<V>(Bytes.EMPTY)));
+  }
+
+  /**
+   * Creates a new Verkle Trie with the specified node as the root.
+   *
+   * @param root The root node of the Verkle Trie.
+   */
+  public SimpleVerkleTrie(final Node<V> root) {
     this.root = root;
-  }
-
-  /**
-   * Creates a new Verkle Trie with the specified node as the root.
-   *
-   * @param root The root node of the Verkle Trie.
-   */
-  public SimpleVerkleTrie(Optional<Node<V>> root) {
-    this.root = root.orElse(new InternalNode<V>(Bytes.EMPTY));
+    this.stemPrunableNodeRegistry = new StemPrunableNodeRegistry();
   }
 
   /**
@@ -98,7 +102,8 @@ public class SimpleVerkleTrie<K extends Bytes, V extends Bytes> implements Verkl
   public Optional<V> put(final K key, final V value) {
     checkNotNull(key);
     checkNotNull(value);
-    final PutVisitor<V> visitor = new PutVisitor<V>(value, Optional.empty());
+    final PutVisitor<V> visitor =
+        new PutVisitor<V>(value, stemPrunableNodeRegistry, Optional.empty());
     this.root = root.accept(visitor, key);
     return visitor.getOldValue();
   }
@@ -111,7 +116,7 @@ public class SimpleVerkleTrie<K extends Bytes, V extends Bytes> implements Verkl
   @Override
   public void remove(final K key) {
     checkNotNull(key);
-    this.root = root.accept(new RemoveVisitor<V>(Optional.empty()), key);
+    this.root = root.accept(new RemoveVisitor<V>(stemPrunableNodeRegistry, Optional.empty()), key);
   }
 
   /**
@@ -143,6 +148,12 @@ public class SimpleVerkleTrie<K extends Bytes, V extends Bytes> implements Verkl
   @Override
   public void commit(final NodeUpdater nodeUpdater) {
     root = root.accept(new HashVisitor<V>(), Bytes.EMPTY);
+    // Prune all stems marked as removable by setting their value to null in the node updater.
+    stemPrunableNodeRegistry
+        .getPrunableStems()
+        .forEach(stem -> nodeUpdater.store(stem, null, null));
+    stemPrunableNodeRegistry.clear();
+    // Commit all updated nodes
     root = root.accept(new CommitVisitor<V>(nodeUpdater), Bytes.EMPTY);
   }
 
