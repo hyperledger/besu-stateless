@@ -21,6 +21,7 @@ import org.hyperledger.besu.ethereum.stateless.node.LeafNode;
 import org.hyperledger.besu.ethereum.stateless.node.Node;
 import org.hyperledger.besu.ethereum.stateless.node.NullNode;
 import org.hyperledger.besu.ethereum.stateless.node.StemNode;
+import org.hyperledger.besu.ethereum.stateless.pruning.StemPrunableNodeRegistry;
 
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ public class PutVisitor<V> implements PathNodeVisitor<V> {
   private Bytes visited; // add consumed bytes to visited
   private Optional<V> oldValue;
 
+  private final StemPrunableNodeRegistry stemPrunableNodeRegistry;
   private final Optional<VerkleTrieBatchHasher> batchProcessor;
 
   /**
@@ -46,8 +48,12 @@ public class PutVisitor<V> implements PathNodeVisitor<V> {
    *
    * @param value The value to be inserted or updated in the Verkle Trie.
    */
-  public PutVisitor(final V value, final Optional<VerkleTrieBatchHasher> batchProcessor) {
+  public PutVisitor(
+      final V value,
+      final StemPrunableNodeRegistry stemPrunableNodeRegistry,
+      final Optional<VerkleTrieBatchHasher> batchProcessor) {
     this.value = value;
+    this.stemPrunableNodeRegistry = stemPrunableNodeRegistry;
     this.visited = Bytes.EMPTY;
     this.oldValue = Optional.empty();
     this.batchProcessor = batchProcessor;
@@ -178,6 +184,7 @@ public class PutVisitor<V> implements PathNodeVisitor<V> {
     // Replace NullNode with a StemNode and visit it
     final Bytes leafKey = Bytes.concatenate(visited, path);
     final StemNode<V> stemNode = new StemNode<V>(visited, leafKey);
+    stemPrunableNodeRegistry.removePrunableStem(stemNode.getStem());
     stemNode.getChildren().forEach(Node::markDirty);
     return stemNode.accept(this, path);
   }

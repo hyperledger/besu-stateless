@@ -58,15 +58,15 @@ public class VerkleTrieBatchHasher {
    * not empty, it removes the node from the batch.
    *
    * @param maybeLocation The location of the node.
-   * @param node The node to add.
+   * @param newNode The node to add.
    */
-  public void addNodeToBatch(final Optional<Bytes> maybeLocation, final Node<?> node) {
+  public void addNodeToBatch(final Optional<Bytes> maybeLocation, final Node<?> newNode) {
     maybeLocation.ifPresent(
         location -> {
-          if (node instanceof NullNode<?> && !location.isEmpty()) {
+          if (newNode instanceof NullNode<?> && !location.isEmpty()) {
             updatedNodes.remove(location);
           } else {
-            updatedNodes.put(location, node);
+            updatedNodes.put(location, newNode);
           }
         });
   }

@@ -63,7 +63,8 @@ public class SimpleBatchedVerkleTrie<K extends Bytes, V extends Bytes>
   public Optional<V> put(final K key, final V value) {
     checkNotNull(key);
     checkNotNull(value);
-    PutVisitor<V> visitor = new PutVisitor<>(value, Optional.of(batchProcessor));
+    PutVisitor<V> visitor =
+        new PutVisitor<>(value, stemPrunableNodeRegistry, Optional.of(batchProcessor));
     this.root = root.accept(visitor, key);
     return visitor.getOldValue();
   }
@@ -71,12 +72,20 @@ public class SimpleBatchedVerkleTrie<K extends Bytes, V extends Bytes>
   @Override
   public void remove(final K key) {
     checkNotNull(key);
-    this.root = root.accept(new RemoveVisitor<V>(Optional.of(batchProcessor)), key);
+    this.root =
+        root.accept(
+            new RemoveVisitor<V>(stemPrunableNodeRegistry, Optional.of(batchProcessor)), key);
   }
 
   @Override
   public void commit(final NodeUpdater nodeUpdater) {
     batchProcessor.calculateStateRoot();
+    // Prune all stems marked as removable by setting their value to null in the node updater.
+    stemPrunableNodeRegistry
+        .getPrunableStems()
+        .forEach(stem -> nodeUpdater.store(stem, null, null));
+    stemPrunableNodeRegistry.clear();
+    // Commit all updated nodes
     root = root.accept(new CommitVisitor<V>(nodeUpdater), Bytes.EMPTY);
   }
 

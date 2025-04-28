@@ -21,6 +21,7 @@ import org.hyperledger.besu.ethereum.stateless.node.LeafNode;
 import org.hyperledger.besu.ethereum.stateless.node.Node;
 import org.hyperledger.besu.ethereum.stateless.node.NullNode;
 import org.hyperledger.besu.ethereum.stateless.node.StemNode;
+import org.hyperledger.besu.ethereum.stateless.pruning.StemPrunableNodeRegistry;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,10 +39,14 @@ import org.apache.tuweni.bytes.Bytes;
 public class RemoveVisitor<V> implements PathNodeVisitor<V> {
   private final GetVisitor<V> getter = new GetVisitor<>();
 
+  private final StemPrunableNodeRegistry stemPrunableNodeRegistry;
   private final Optional<VerkleTrieBatchHasher> batchProcessor;
   private final FlattenVisitor<V> flatten;
 
-  public RemoveVisitor(final Optional<VerkleTrieBatchHasher> batchProcessor) {
+  public RemoveVisitor(
+      final StemPrunableNodeRegistry stemPrunableNodeRegistry,
+      final Optional<VerkleTrieBatchHasher> batchProcessor) {
+    this.stemPrunableNodeRegistry = stemPrunableNodeRegistry;
     this.batchProcessor = batchProcessor;
     this.flatten = new FlattenVisitor<>(batchProcessor);
   }
@@ -104,12 +109,15 @@ public class RemoveVisitor<V> implements PathNodeVisitor<V> {
       nullNode.markDirty();
       batchProcessor.ifPresent(
           processor -> processor.addNodeToBatch(stemNode.getLocation(), nullNode));
+      stemPrunableNodeRegistry.markPrunableStem(stemNode.getStem());
       return nullNode;
     }
     boolean isNullLeafNode = child instanceof NullNode<V> nullLeafNode && nullLeafNode.isLeaf();
     if (!isNullLeafNode) { // Removed a genuine leaf-node
       batchProcessor.ifPresent(
-          processor -> processor.addNodeToBatch(stemNode.getLocation(), stemNode));
+          processor -> {
+            processor.addNodeToBatch(stemNode.getLocation(), stemNode);
+          });
       stemNode.markDirty();
     }
     return stemNode;
