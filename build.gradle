@@ -111,6 +111,7 @@ allprojects {
         'Specification-Version': project.version,
         'Implementation-Title': archiveBaseName,
         'Implementation-Version': project.version,
+        'Commit-Hash': getCommitHash(),
         'Automatic-Module-Name': 'org.hyperledger.besu.stateless'
         )
     }
@@ -277,6 +278,15 @@ task checkSpdxHeader(type: CheckSpdxHeader) {
     "(.*${sep}build${sep}.*)",
     "(.*${sep}src${sep}[^${sep}]+${sep}generated${sep}.*)"
   ].join("|")
+}
+
+def getCommitHash() {
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'rev-parse', 'HEAD'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
 }
 
 
